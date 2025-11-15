@@ -15,8 +15,12 @@ RUN npm ci --only=production
 # Stage 2: Production image
 FROM node:20-alpine
 
-# Instalar curl para health check
-RUN apk add --no-cache curl
+# Instalar curl para health check e fontes para renderização de texto
+RUN apk add --no-cache \
+    curl \
+    fontconfig \
+    ttf-dejavu \
+    font-noto
 
 WORKDIR /app
 
