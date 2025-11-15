@@ -8,7 +8,19 @@ const app = express();
 app.use(express.json());
 
 app.post("/generate", async (req, res) => {
-  const { template, logo1, logo2, data, hora, titulo, estadio } = req.body;
+  const {
+    template,
+    logo1,
+    logo2,
+    data,
+    hora,
+    titulo,
+    estadio,
+    time1Cor1,
+    time1Cor2,
+    time2Cor1,
+    time2Cor2
+  } = req.body;
 
   try {
     // Caminho completo do template
@@ -21,12 +33,16 @@ app.post("/generate", async (req, res) => {
     // Carrega o SVG do template como string
     let templateSVG = fs.readFileSync(templatePath, "utf-8");
 
-    // Substitui as variáveis no template
+    // Substitui as variáveis no template (usando replaceAll para múltiplas ocorrências)
     templateSVG = templateSVG
-      .replace("{{TITULO}}", titulo || "PARTIDA DE FUTEBOL")
-      .replace("{{DATA}}", data || "DATA")
-      .replace("{{HORA}}", hora || "HORA")
-      .replace("{{ESTADIO}}", estadio || "ESTÁDIO");
+      .replaceAll("{{TITULO}}", titulo || "PARTIDA DE FUTEBOL")
+      .replaceAll("{{DATA}}", data || "DATA")
+      .replaceAll("{{HORA}}", hora || "HORA")
+      .replaceAll("{{ESTADIO}}", estadio || "ESTÁDIO")
+      .replaceAll("{{TIME1_COR1}}", time1Cor1 || "#0A0F2D")
+      .replaceAll("{{TIME1_COR2}}", time1Cor2 || "#1A4870")
+      .replaceAll("{{TIME2_COR1}}", time2Cor1 || "#8B0000")
+      .replaceAll("{{TIME2_COR2}}", time2Cor2 || "#DC143C");
 
     // --- Função para baixar e redimensionar logos ---
     const loadAndResize = async (url) => {
@@ -47,8 +63,8 @@ app.post("/generate", async (req, res) => {
     // Coords fixas iguais ao seu layout
     const finalImage = await base
       .composite([
-        { input: logo1Buffer, top: 200, left: 150 },
-        { input: logo2Buffer, top: 200, left: 750 },
+        { input: logo1Buffer, top: 220, left: 150 },
+        { input: logo2Buffer, top: 220, left: 750 },
       ])
       .toBuffer();
 
