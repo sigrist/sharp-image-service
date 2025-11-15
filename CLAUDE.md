@@ -8,18 +8,77 @@ This is a Node.js Express service that generates dynamic images by compositing l
 
 ## Running the Service
 
+### Local Development
+
 Start the server:
 ```bash
 node server.js
+# or
+npm start
 ```
 
-The API runs on port 3000.
+The API runs on port 3000 by default.
+
+### Docker Deployment
+
+The service includes full Docker support with multi-stage builds for optimized production deployment.
+
+#### Using Docker Compose (Recommended)
+
+```bash
+# Build and start the service
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop the service
+docker-compose down
+```
+
+#### Using Docker CLI
+
+```bash
+# Build the image
+docker build -t sharp-image-service .
+
+# Run the container
+docker run -d \
+  --name sharp-image-service \
+  -p 3000:3000 \
+  -v $(pwd)/templates:/app/templates:ro \
+  -e TEMPLATES_DIR=/app/templates \
+  sharp-image-service
+
+# Check health
+docker ps
+curl http://localhost:3000/health
+```
+
+#### Environment Variables
+
+The service supports the following environment variables:
+
+- `TEMPLATES_DIR`: Path to templates directory (default: `./templates`)
+- `PORT`: HTTP port for the service (default: `3000`)
+- `NODE_ENV`: Node environment (default: `production` in Docker)
+
+#### Health Check
+
+The service exposes a health check endpoint:
+- **Endpoint**: `GET /health`
+- **Response**: `{"status": "ok"}`
+- **Use case**: Docker health checks, load balancers, monitoring tools
 
 ## Architecture
 
-### Single Endpoint Design
+### API Endpoints
 
-The service exposes one POST endpoint `/generate` that handles all image generation:
+The service exposes the following endpoints:
+
+#### POST /generate
+
+Main endpoint that handles all image generation:
 
 **Request body:**
 - `template`: (required) Filename of the SVG template (from `templates/` directory, e.g., "futebol.svg")
@@ -49,6 +108,14 @@ The service exposes one POST endpoint `/generate` that handles all image generat
   "time1Cor2": "#AA0000"
 }
 ```
+
+#### GET /health
+
+Health check endpoint for monitoring and container orchestration:
+
+**Response:** `{"status": "ok"}` with HTTP 200
+
+Used by Docker healthchecks, Kubernetes liveness/readiness probes, and load balancers.
 
 ### Image Processing Pipeline
 
@@ -137,10 +204,12 @@ Templates consist of **two files** in the `templates/` directory:
 This is a single-file application (`server.js`):
 - ES modules enabled via `"type": "module"` in package.json
 - Uses async/await for image processing operations
-- `loadTemplateConfig()`: Loads and parses JSON config files (server.js:11-20)
-- `loadLogoSource()`: Detects and processes logo sources (URL or data URI) (server.js:23-35)
-- `loadAndResizeLogo()`: Resizes logos using Sharp (server.js:38-44)
-- Main endpoint uses config-driven composition with dynamic variable replacement (server.js:46-115)
+- Environment configuration via `TEMPLATES_DIR` and `PORT` variables (server.js:11-12)
+- `loadTemplateConfig()`: Loads and parses JSON config files (server.js:15-24)
+- `loadLogoSource()`: Detects and processes logo sources (URL or data URI) (server.js:27-39)
+- `loadAndResizeLogo()`: Resizes logos using Sharp (server.js:42-48)
+- Main POST `/generate` endpoint: Config-driven composition with dynamic variable replacement (server.js:50-124)
+- Health check GET `/health` endpoint: Returns service status (server.js:127-129)
 - Font rendering uses SVG text elements embedded in templates
 
 ## Important Notes
@@ -153,3 +222,43 @@ This is a single-file application (`server.js`):
 - **No validation**: Missing template configs return 404, but invalid variables are silently ignored
 - **No authentication or rate limiting**: Service is completely open
 - **Error handling**: Returns 500 status with generic message on failures
+
+## Docker Configuration
+
+### Multi-Stage Build
+
+The Dockerfile uses a multi-stage build to optimize image size:
+- **Stage 1 (builder)**: Installs all dependencies including build tools for Sharp's native modules
+- **Stage 2 (production)**: Creates minimal runtime image with only production dependencies
+
+### Image Details
+
+- **Base image**: Node 20 Alpine (lightweight Linux distribution)
+- **Working directory**: `/app`
+- **Exposed port**: 3000 (configurable via `PORT` env var)
+- **User**: Non-root `nodejs` user for security
+- **Health check**: Configured to poll `/health` endpoint every 30 seconds
+
+### Volume Mounts
+
+The `docker-compose.yml` mounts the local `templates/` directory as a read-only volume:
+```yaml
+volumes:
+  - ./templates:/app/templates:ro
+```
+
+This allows updating templates without rebuilding the Docker image. To use different templates:
+1. Modify files in the local `templates/` directory
+2. Restart the container: `docker-compose restart`
+
+### Customization
+
+To use a different templates directory:
+```bash
+# Option 1: Modify docker-compose.yml
+volumes:
+  - /path/to/custom/templates:/app/templates:ro
+
+# Option 2: Override via docker run
+docker run -v /path/to/custom/templates:/app/templates:ro sharp-image-service
+```
