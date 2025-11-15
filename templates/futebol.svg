@@ -1,0 +1,173 @@
+<svg width="1200" height="675" viewBox="0 0 1200 675" xmlns="http://www.w3.org/2000/svg">
+
+  <defs>
+    <!-- Gradientes radiais partindo dos escudos -->
+    <radialGradient id="radialTime1" cx="300" cy="350" r="600">
+      <stop offset="0%" stop-color="{{TIME1_COR1}}" stop-opacity="0.4"/>
+      <stop offset="40%" stop-color="{{TIME1_COR2}}" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="{{TIME1_COR2}}" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="radialTime2" cx="900" cy="350" r="600">
+      <stop offset="0%" stop-color="{{TIME2_COR1}}" stop-opacity="0.4"/>
+      <stop offset="40%" stop-color="{{TIME2_COR2}}" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="{{TIME2_COR2}}" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Gradiente para bordas -->
+    <linearGradient id="gradTime1Border" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="{{TIME1_COR1}}"/>
+      <stop offset="100%" stop-color="{{TIME1_COR2}}"/>
+    </linearGradient>
+
+    <linearGradient id="gradTime2Border" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="{{TIME2_COR1}}"/>
+      <stop offset="100%" stop-color="{{TIME2_COR2}}"/>
+    </linearGradient>
+
+    <!-- Filtros de sombra e glow -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="shadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="4" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Pattern geométrico -->
+    <pattern id="pattern1" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M0 0L40 40M40 0L0 40" stroke="{{TIME1_COR1}}" stroke-width="0.5" opacity="0.1"/>
+    </pattern>
+
+    <pattern id="pattern2" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M0 0L40 40M40 0L0 40" stroke="{{TIME2_COR1}}" stroke-width="0.5" opacity="0.1"/>
+    </pattern>
+  </defs>
+
+  <!-- Fundo base -->
+  <rect width="1200" height="675" fill="#f8f9fa" />
+
+  <!-- Split diagonal de fundo -->
+  <polygon points="0,0 650,0 550,675 0,675" fill="{{TIME1_COR2}}" opacity="0.08"/>
+  <polygon points="550,0 1200,0 1200,675 650,675" fill="{{TIME2_COR2}}" opacity="0.08"/>
+
+  <!-- Efeitos radiais partindo dos escudos -->
+  <rect width="1200" height="675" fill="url(#radialTime1)" />
+  <rect width="1200" height="675" fill="url(#radialTime2)" />
+
+  <!-- Patterns geométricos -->
+  <rect x="0" y="0" width="600" height="675" fill="url(#pattern1)"/>
+  <rect x="600" y="0" width="600" height="675" fill="url(#pattern2)"/>
+
+  <!-- Title Bar com sombra -->
+  <rect x="0" y="0" width="1200" height="110" fill="rgba(255,255,255,0.95)" filter="url(#shadow)"/>
+  <rect x="0" y="108" width="1200" height="2" fill="url(#gradTime1Border)" opacity="0.5"/>
+  <rect x="600" y="108" width="600" height="2" fill="url(#gradTime2Border)" opacity="0.5"/>
+
+  <text x="600" y="70"
+        font-size="52"
+        fill="#1a1a1a"
+        font-family="Arial"
+        font-weight="bold"
+        text-anchor="middle"
+        letter-spacing="2">
+      {{TITULO}}
+  </text>
+
+  <!-- Linha divisória central com clash de cores -->
+  <rect x="598" y="120" width="4" height="440" fill="url(#gradTime1Border)" opacity="0.3"/>
+  <rect x="598" y="120" width="4" height="440" fill="url(#gradTime2Border)" opacity="0.3" style="mix-blend-mode: screen"/>
+
+  <!-- Team Sections - Time 1 com efeito glow -->
+  <g filter="url(#shadow)">
+    <rect x="150" y="220" width="300" height="300"
+          rx="24" fill="rgba(255,255,255,0.9)" />
+  </g>
+
+  <!-- Borda externa glow Time 1 -->
+  <rect x="145" y="215" width="310" height="310"
+        rx="26" fill="none" stroke="url(#gradTime1Border)"
+        stroke-width="6" filter="url(#glow)" opacity="0.8"/>
+
+  <!-- Borda interna Time 1 -->
+  <rect x="155" y="225" width="290" height="290"
+        rx="22" fill="none" stroke="url(#gradTime1Border)" stroke-width="2" opacity="0.4"/>
+
+  <!-- Team Sections - Time 2 com efeito glow -->
+  <g filter="url(#shadow)">
+    <rect x="750" y="220" width="300" height="300"
+          rx="24" fill="rgba(255,255,255,0.9)" />
+  </g>
+
+  <!-- Borda externa glow Time 2 -->
+  <rect x="745" y="215" width="310" height="310"
+        rx="26" fill="none" stroke="url(#gradTime2Border)"
+        stroke-width="6" filter="url(#glow)" opacity="0.8"/>
+
+  <!-- Borda interna Time 2 -->
+  <rect x="755" y="225" width="290" height="290"
+        rx="22" fill="none" stroke="url(#gradTime2Border)" stroke-width="2" opacity="0.4"/>
+
+  <!-- VS com efeito especial -->
+  <circle cx="600" cy="370" r="70" fill="rgba(255,255,255,0.95)" filter="url(#shadow)"/>
+  <circle cx="600" cy="370" r="70" fill="none" stroke="url(#gradTime1Border)" stroke-width="3" opacity="0.5"/>
+  <circle cx="600" cy="370" r="70" fill="none" stroke="url(#gradTime2Border)" stroke-width="3" opacity="0.5"
+          stroke-dasharray="10 5" style="mix-blend-mode: screen"/>
+
+  <text x="600" y="390"
+        font-size="50"
+        fill="#1a1a1a"
+        font-family="Arial"
+        font-weight="bold"
+        text-anchor="middle"
+        letter-spacing="4">
+      VS
+  </text>
+
+  <!-- Footer com gradiente -->
+  <rect x="0" y="565" width="1200" height="110" fill="rgba(255,255,255,0.95)" filter="url(#shadow)"/>
+  <rect x="0" y="565" width="600" height="2" fill="url(#gradTime1Border)" opacity="0.5"/>
+  <rect x="600" y="565" width="600" height="2" fill="url(#gradTime2Border)" opacity="0.5"/>
+
+  <!-- Ícone decorativo central -->
+  <circle cx="600" cy="620" r="3" fill="url(#gradTime1Border)"/>
+  <circle cx="590" cy="620" r="2" fill="url(#gradTime1Border)" opacity="0.6"/>
+  <circle cx="610" cy="620" r="2" fill="url(#gradTime2Border)" opacity="0.6"/>
+
+  <text x="600" y="605"
+        font-size="38"
+        fill="#1a1a1a"
+        font-family="Arial"
+        font-weight="bold"
+        text-anchor="middle"
+        letter-spacing="3">
+      {{DATA}} — {{HORA}}
+  </text>
+
+  <text x="600" y="645"
+        font-size="24"
+        fill="#555555"
+        font-family="Arial"
+        text-anchor="middle"
+        letter-spacing="1">
+      {{ESTADIO}}
+  </text>
+
+  <!-- Elementos decorativos laterais -->
+  <line x1="200" y1="620" x2="400" y2="620" stroke="url(#gradTime1Border)" stroke-width="1" opacity="0.3"/>
+  <line x1="800" y1="620" x2="1000" y2="620" stroke="url(#gradTime2Border)" stroke-width="1" opacity="0.3"/>
+
+</svg>
+

@@ -7,20 +7,44 @@ import path from "path";
 const app = express();
 app.use(express.json());
 
+// Função para carregar configuração do template
+const loadTemplateConfig = (templateName) => {
+  const configPath = path.join("templates", templateName.replace(".svg", ".json"));
+
+  if (!fs.existsSync(configPath)) {
+    return null;
+  }
+
+  const configContent = fs.readFileSync(configPath, "utf-8");
+  return JSON.parse(configContent);
+};
+
+// Função para processar logo (URL ou base64 data URI)
+const loadLogoSource = async (source) => {
+  // Detecta se é data URI (base64)
+  if (source.startsWith("data:image/")) {
+    // Extrai o base64 após a vírgula
+    const base64Data = source.split(",")[1];
+    return Buffer.from(base64Data, "base64");
+  }
+
+  // Caso contrário, trata como URL
+  const response = await fetch(source);
+  const buffer = await response.arrayBuffer();
+  return Buffer.from(buffer);
+};
+
+// Função para baixar e redimensionar logos
+const loadAndResizeLogo = async (source, width, height) => {
+  const buffer = await loadLogoSource(source);
+  return sharp(buffer)
+    .resize(width, height)
+    .png()
+    .toBuffer();
+};
+
 app.post("/generate", async (req, res) => {
-  const {
-    template,
-    logo1,
-    logo2,
-    data,
-    hora,
-    titulo,
-    estadio,
-    time1Cor1,
-    time1Cor2,
-    time2Cor1,
-    time2Cor2
-  } = req.body;
+  const { template, ...variables } = req.body;
 
   try {
     // Caminho completo do template
@@ -30,42 +54,60 @@ app.post("/generate", async (req, res) => {
       return res.status(404).send("Template não encontrado.");
     }
 
+    // Carrega configuração do template
+    const config = loadTemplateConfig(template);
+
+    if (!config) {
+      return res.status(404).send("Configuração do template não encontrada.");
+    }
+
     // Carrega o SVG do template como string
     let templateSVG = fs.readFileSync(templatePath, "utf-8");
 
-    // Substitui as variáveis no template (usando replaceAll para múltiplas ocorrências)
-    templateSVG = templateSVG
-      .replaceAll("{{TITULO}}", titulo || "PARTIDA DE FUTEBOL")
-      .replaceAll("{{DATA}}", data || "DATA")
-      .replaceAll("{{HORA}}", hora || "HORA")
-      .replaceAll("{{ESTADIO}}", estadio || "ESTÁDIO")
-      .replaceAll("{{TIME1_COR1}}", time1Cor1 || "#0A0F2D")
-      .replaceAll("{{TIME1_COR2}}", time1Cor2 || "#1A4870")
-      .replaceAll("{{TIME2_COR1}}", time2Cor1 || "#8B0000")
-      .replaceAll("{{TIME2_COR2}}", time2Cor2 || "#DC143C");
+    // Normaliza as chaves do payload para uppercase (exceto logos)
+    const normalizedVariables = {};
+    for (const [key, value] of Object.entries(variables)) {
+      const isLogo = config.logos.some(logo => logo.name === key);
+      if (!isLogo) {
+        normalizedVariables[key.toUpperCase()] = value;
+      }
+    }
 
-    // --- Função para baixar e redimensionar logos ---
-    const loadAndResize = async (url) => {
-      const response = await fetch(url);
-      const buffer = await response.arrayBuffer();
-      return sharp(Buffer.from(buffer))
-        .resize(300, 300) // <- TAMANHO FORÇADO
-        .png()
-        .toBuffer();
-    };
+    // Substitui as variáveis dinamicamente no template
+    // Primeiro aplica os defaults da config, depois sobrescreve com valores do payload
+    const allVariables = { ...config.defaultVariables, ...normalizedVariables };
 
-    const logo1Buffer = await loadAndResize(logo1);
-    const logo2Buffer = await loadAndResize(logo2);
+    for (const [key, value] of Object.entries(allVariables)) {
+      const placeholder = `{{${key}}}`;
+      templateSVG = templateSVG.replaceAll(placeholder, value);
+    }
+
+    // Processa os logos dinamicamente baseado na config
+    const logoBuffers = [];
+    for (const logoConfig of config.logos) {
+      const logoSource = variables[logoConfig.name];
+
+      if (logoSource) {
+        const logoBuffer = await loadAndResizeLogo(
+          logoSource,
+          logoConfig.width,
+          logoConfig.height
+        );
+
+        logoBuffers.push({
+          input: logoBuffer,
+          top: logoConfig.top,
+          left: logoConfig.left
+        });
+      }
+    }
 
     // Renderiza o SVG como imagem base
     const base = sharp(Buffer.from(templateSVG)).png();
 
-    // Coords fixas iguais ao seu layout
+    // Composita os logos dinamicamente
     const finalImage = await base
-      .composite([
-        { input: logo1Buffer, top: 220, left: 150 },
-        { input: logo2Buffer, top: 220, left: 750 },
-      ])
+      .composite(logoBuffers)
       .toBuffer();
 
     res.set("Content-Type", "image/png");
