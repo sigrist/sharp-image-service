@@ -21,12 +21,14 @@ The API runs on port 3000 by default.
 
 ### Docker Deployment
 
-The service includes full Docker support with multi-stage builds for optimized production deployment.
+The service includes full Docker support with multi-stage builds for optimized production deployment. Images are automatically published to GitHub Container Registry (ghcr.io) on each release.
 
-#### Using Docker Compose (Recommended)
+#### Production (GitHub Container Registry)
+
+The recommended way to deploy is using pre-built images from GitHub Container Registry:
 
 ```bash
-# Build and start the service
+# Pull e execute usando Docker Compose (recomendado)
 docker-compose up -d
 
 # View logs
@@ -36,23 +38,49 @@ docker-compose logs -f
 docker-compose down
 ```
 
-#### Using Docker CLI
+**Usando Docker CLI:**
 
 ```bash
-# Build the image
-docker build -t sharp-image-service .
+# Pull da imagem do GitHub Container Registry
+docker pull ghcr.io/sigrist/sharp-image-service:latest
 
-# Run the container
+# Execute o container
 docker run -d \
   --name sharp-image-service \
   -p 3000:3000 \
   -v $(pwd)/templates:/app/templates:ro \
   -e TEMPLATES_DIR=/app/templates \
-  sharp-image-service
+  ghcr.io/sigrist/sharp-image-service:latest
 
 # Check health
 docker ps
 curl http://localhost:3000/health
+```
+
+**Tags disponíveis:**
+- `latest`: Última versão da branch principal
+- `vX.Y.Z`: Versão específica (ex: v1.0.0)
+- `vX.Y`: Minor version (ex: v1.0)
+- `vX`: Major version (ex: v1)
+
+#### Desenvolvimento Local
+
+Para desenvolvimento local com build da imagem:
+
+```bash
+# Use o docker-compose.dev.yml
+docker-compose -f docker-compose.dev.yml up -d
+
+# Rebuild após mudanças no código
+docker-compose -f docker-compose.dev.yml up -d --build
+
+# Ou usando Docker CLI
+docker build -t sharp-image-service .
+docker run -d \
+  --name sharp-image-service \
+  -p 3000:3000 \
+  -v $(pwd)/templates:/app/templates:ro \
+  sharp-image-service
 ```
 
 #### Environment Variables
@@ -225,6 +253,38 @@ This is a single-file application (`server.js`):
 
 ## Docker Configuration
 
+### Automated Publishing (GitHub Actions)
+
+The project uses GitHub Actions to automatically build and publish Docker images to GitHub Container Registry (ghcr.io).
+
+**Workflow triggers:**
+- **Release published**: Quando você cria uma nova release no GitHub
+- **Manual dispatch**: Pode ser executado manualmente via GitHub UI
+
+**Processo automatizado:**
+1. Checkout do código
+2. Setup do Docker Buildx para multi-platform builds
+3. Login no GitHub Container Registry usando `GITHUB_TOKEN`
+4. Extração de metadata (tags e labels) da release
+5. Build da imagem para múltiplas plataformas (linux/amd64, linux/arm64)
+6. Push da imagem com tags apropriadas
+
+**Tags geradas automaticamente:**
+- Versão completa: `v1.2.3` → `ghcr.io/sigrist/sharp-image-service:1.2.3`
+- Minor version: `v1.2.3` → `ghcr.io/sigrist/sharp-image-service:1.2`
+- Major version: `v1.2.3` → `ghcr.io/sigrist/sharp-image-service:1`
+- Latest: `ghcr.io/sigrist/sharp-image-service:latest` (apenas na branch principal)
+
+**Como criar uma release e publicar a imagem:**
+1. Crie uma tag: `git tag v1.0.0`
+2. Push da tag: `git push origin v1.0.0`
+3. No GitHub, vá em "Releases" → "Create a new release"
+4. Selecione a tag criada, adicione notas de release
+5. Publique a release
+6. O GitHub Actions automaticamente fará build e push da imagem
+
+**Arquivo de configuração:** `.github/workflows/docker-publish.yml`
+
 ### Multi-Stage Build
 
 The Dockerfile uses a multi-stage build to optimize image size:
@@ -251,14 +311,53 @@ This allows updating templates without rebuilding the Docker image. To use diffe
 1. Modify files in the local `templates/` directory
 2. Restart the container: `docker-compose restart`
 
+### GitHub Container Registry Permissions
+
+Por padrão, os pacotes no GitHub Container Registry podem ser privados. Para tornar a imagem pública:
+
+1. Acesse: https://github.com/users/sigrist/packages/container/sharp-image-service/settings
+2. Em "Danger Zone", clique em "Change visibility"
+3. Selecione "Public"
+4. Confirme a mudança
+
+Isso permite que qualquer pessoa faça pull da imagem sem autenticação.
+
 ### Customization
 
-To use a different templates directory:
+**Templates directory customizado:**
 ```bash
-# Option 1: Modify docker-compose.yml
+# Opção 1: Modificar docker-compose.yml
 volumes:
   - /path/to/custom/templates:/app/templates:ro
 
-# Option 2: Override via docker run
-docker run -v /path/to/custom/templates:/app/templates:ro sharp-image-service
+# Opção 2: Override via docker run
+docker run -d \
+  -p 3000:3000 \
+  -v /path/to/custom/templates:/app/templates:ro \
+  -e TEMPLATES_DIR=/app/templates \
+  ghcr.io/sigrist/sharp-image-service:latest
+```
+
+**Usar versão específica:**
+```bash
+# docker-compose.yml
+image: ghcr.io/sigrist/sharp-image-service:1.0.0
+
+# Docker CLI
+docker pull ghcr.io/sigrist/sharp-image-service:1.0.0
+```
+
+**Porta customizada:**
+```bash
+# docker-compose.yml
+environment:
+  - PORT=8080
+ports:
+  - "8080:8080"
+
+# Docker CLI
+docker run -d \
+  -p 8080:8080 \
+  -e PORT=8080 \
+  ghcr.io/sigrist/sharp-image-service:latest
 ```

@@ -1,15 +1,20 @@
 version: '3.8'
 
+# Arquivo docker-compose para DESENVOLVIMENTO LOCAL
+# Faz build da imagem localmente ao invés de baixar do registry
+# Uso: docker-compose -f docker-compose.dev.yml up -d
+
 services:
   image-service:
-    # Imagem publicada no GitHub Container Registry
-    image: ghcr.io/sigrist/sharp-image-service:latest
-    container_name: sharp-image-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sharp-image-service-dev
     restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - TEMPLATES_DIR=/app/templates
       - PORT=3000
     volumes:
