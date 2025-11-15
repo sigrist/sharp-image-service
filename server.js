@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 
 app.post("/generate", async (req, res) => {
-  const { template, logo1, logo2, data, hora } = req.body;
+  const { template, logo1, logo2, data, hora, titulo, estadio } = req.body;
 
   try {
     // Caminho completo do template
@@ -18,8 +18,15 @@ app.post("/generate", async (req, res) => {
       return res.status(404).send("Template não encontrado.");
     }
 
-    // Carrega o SVG do template
-    const templateSVG = fs.readFileSync(templatePath);
+    // Carrega o SVG do template como string
+    let templateSVG = fs.readFileSync(templatePath, "utf-8");
+
+    // Substitui as variáveis no template
+    templateSVG = templateSVG
+      .replace("{{TITULO}}", titulo || "PARTIDA DE FUTEBOL")
+      .replace("{{DATA}}", data || "DATA")
+      .replace("{{HORA}}", hora || "HORA")
+      .replace("{{ESTADIO}}", estadio || "ESTÁDIO");
 
     // --- Função para baixar e redimensionar logos ---
     const loadAndResize = async (url) => {
@@ -35,41 +42,13 @@ app.post("/generate", async (req, res) => {
     const logo2Buffer = await loadAndResize(logo2);
 
     // Renderiza o SVG como imagem base
-    const base = sharp(templateSVG).png();
+    const base = sharp(Buffer.from(templateSVG)).png();
 
     // Coords fixas iguais ao seu layout
     const finalImage = await base
       .composite([
         { input: logo1Buffer, top: 200, left: 150 },
         { input: logo2Buffer, top: 200, left: 750 },
-
-        // DATA via SVG sobreposto
-        {
-          input: Buffer.from(`
-            <svg width="1200" height="200">
-              <text x="450" y="150" font-size="80" fill="white"
-                font-family="Arial, Helvetica, sans-serif">
-                ${data}
-              </text>
-            </svg>
-          `),
-          top: 900,
-          left: 0,
-        },
-
-        // HORA via SVG sobreposto
-        {
-          input: Buffer.from(`
-            <svg width="1200" height="200">
-              <text x="1000" y="150" font-size="80" fill="white"
-                font-family="Arial, Helvetica, sans-serif">
-                ${hora}
-              </text>
-            </svg>
-          `),
-          top: 900,
-          left: 0,
-        },
       ])
       .toBuffer();
 
