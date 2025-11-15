@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  image-service:
+    # Imagem publicada no GitHub Container Registry
+    image: ghcr.io/sigrist/sharp-image-service:latest
+    container_name: sharp-image-service
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - TEMPLATES_DIR=/app/templates
+      - PORT=3000
+    volumes:
+      # Monta a pasta local de templates como read-only
+      - ./templates:/app/templates:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+    networks:
+      - image-service-network
+
+networks:
+  image-service-network:
+    driver: bridge

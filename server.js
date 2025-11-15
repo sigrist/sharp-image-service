@@ -7,9 +7,13 @@ import path from "path";
 const app = express();
 app.use(express.json());
 
+// Configuração via variáveis de ambiente
+const TEMPLATES_DIR = process.env.TEMPLATES_DIR || "./templates";
+const PORT = process.env.PORT || 3000;
+
 // Função para carregar configuração do template
 const loadTemplateConfig = (templateName) => {
-  const configPath = path.join("templates", templateName.replace(".svg", ".json"));
+  const configPath = path.join(TEMPLATES_DIR, templateName.replace(".svg", ".json"));
 
   if (!fs.existsSync(configPath)) {
     return null;
@@ -48,7 +52,7 @@ app.post("/generate", async (req, res) => {
 
   try {
     // Caminho completo do template
-    const templatePath = path.join("templates", template);
+    const templatePath = path.join(TEMPLATES_DIR, template);
 
     if (!fs.existsSync(templatePath)) {
       return res.status(404).send("Template não encontrado.");
@@ -119,5 +123,10 @@ app.post("/generate", async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log("API rodando na porta 3000"));
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+app.listen(PORT, () => console.log(`API rodando na porta ${PORT}`));
 

@@ -1,0 +1,34 @@
+version: '3.8'
+
+# Arquivo docker-compose para DESENVOLVIMENTO LOCAL
+# Faz build da imagem localmente ao invés de baixar do registry
+# Uso: docker-compose -f docker-compose.dev.yml up -d
+
+services:
+  image-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sharp-image-service-dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - TEMPLATES_DIR=/app/templates
+      - PORT=3000
+    volumes:
+      # Monta a pasta local de templates como read-only
+      - ./templates:/app/templates:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+    networks:
+      - image-service-network
+
+networks:
+  image-service-network:
+    driver: bridge
