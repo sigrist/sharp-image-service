@@ -114,8 +114,16 @@ app.post("/generate", async (req, res) => {
       .composite(logoBuffers)
       .toBuffer();
 
-    res.set("Content-Type", "image/png");
-    res.send(finalImage);
+    // Verifica se deve retornar em formato base64
+    if (req.query.format === "base64") {
+      const base64String = finalImage.toString("base64");
+      const dataUri = `data:image/png;base64,${base64String}`;
+      res.set("Content-Type", "text/plain");
+      res.send(dataUri);
+    } else {
+      res.set("Content-Type", "image/png");
+      res.send(finalImage);
+    }
 
   } catch (err) {
     console.error(err);
