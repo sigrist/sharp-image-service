@@ -114,6 +114,11 @@ app.post("/generate", async (req, res) => {
       .composite(logoBuffers)
       .toBuffer();
 
+    // Gera um nome de arquivo baseado no template e timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    const templateBaseName = template.replace('.svg', '');
+    const filename = `${templateBaseName}_${timestamp}.png`;
+
     // Verifica se deve retornar em formato base64
     if (req.query.format === "base64") {
       const base64String = finalImage.toString("base64");
@@ -122,6 +127,7 @@ app.post("/generate", async (req, res) => {
       res.send(dataUri);
     } else {
       res.set("Content-Type", "image/png");
+      res.set("Content-Disposition", `inline; filename="${filename}"`);
       res.send(finalImage);
     }
 
