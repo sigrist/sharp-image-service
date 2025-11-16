@@ -10,14 +10,12 @@ This is a Node.js Express service that generates dynamic images by compositing l
 
 ### Local Development
 
-Start the server:
 ```bash
-node server.js
-# or
-npm start
+npm start                    # Start the server (port 3000 by default)
+node server.js              # Alternative: direct execution
+PORT=8080 npm start         # Custom port
+TEMPLATES_DIR=./my-templates npm start  # Custom templates directory
 ```
-
-The API runs on port 3000 by default.
 
 ### Docker Deployment
 
@@ -120,21 +118,53 @@ Main endpoint that handles all image generation:
   - Unmatched parameters are ignored
   - Missing parameters use defaults from the template config file
 
-**Response:** PNG image buffer with Content-Type: image/png
+**Query string parameters (optional):**
+- `format`: Output format for the generated image
+  - `base64`: Returns the image as a data URI string (text/plain) that can be used directly in HTML `<img>` tags
+  - Default (no parameter): Returns binary PNG image (image/png)
 
-**Example request:**
-```json
-{
-  "template": "futebol.svg",
-  "logo1": "https://example.com/team1-logo.png",
-  "logo2": "data:image/png;base64,iVBORw0KGg...",
-  "titulo": "COPA FINAL",
-  "data": "15 NOV 2025",
-  "hora": "16:00",
-  "estadio": "MARACANÃ",
-  "time1Cor1": "#FF0000",
-  "time1Cor2": "#AA0000"
-}
+**Response:**
+- **Default**: PNG image buffer with Content-Type: image/png
+- **With `?format=base64`**: Data URI string with Content-Type: text/plain (format: `data:image/png;base64,iVBORw0...`)
+
+**Example request (binary PNG):**
+```bash
+curl -X POST http://localhost:3000/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "template": "futebol.svg",
+    "logo1": "https://example.com/team1-logo.png",
+    "logo2": "data:image/png;base64,iVBORw0KGg...",
+    "titulo": "COPA FINAL",
+    "data": "15 NOV 2025",
+    "hora": "16:00",
+    "estadio": "MARACANÃ",
+    "time1Cor1": "#FF0000",
+    "time1Cor2": "#AA0000"
+  }' \
+  --output image.png
+```
+
+**Example request (base64 data URI):**
+```bash
+curl -X POST "http://localhost:3000/generate?format=base64" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "template": "futebol.svg",
+    "logo1": "https://example.com/team1-logo.png",
+    "logo2": "https://example.com/team2-logo.png",
+    "titulo": "COPA FINAL"
+  }'
+```
+
+**Example response (base64):**
+```
+data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABLAAAAKrCAYAAAD...
+```
+
+**Using base64 response in HTML:**
+```html
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABLAAAAKrCAYAAAD..." alt="Generated Image">
 ```
 
 #### GET /health
