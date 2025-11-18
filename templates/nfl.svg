@@ -1,0 +1,148 @@
+<svg width="1200" height="675" viewBox="0 0 1200 675" xmlns="http://www.w3.org/2000/svg">
+
+  <defs>
+    <!-- Gradientes radiais partindo dos logos -->
+    <radialGradient id="radialAway" cx="300" cy="370" r="600">
+      <stop offset="0%" stop-color="{{AWAY_COR1}}" stop-opacity="0.35"/>
+      <stop offset="40%" stop-color="{{AWAY_COR2}}" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="{{AWAY_COR2}}" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="radialHome" cx="900" cy="370" r="600">
+      <stop offset="0%" stop-color="{{HOME_COR1}}" stop-opacity="0.35"/>
+      <stop offset="40%" stop-color="{{HOME_COR2}}" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="{{HOME_COR2}}" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Gradiente para bordas -->
+    <linearGradient id="gradAwayBorder" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="{{AWAY_COR1}}"/>
+      <stop offset="100%" stop-color="{{AWAY_COR2}}"/>
+    </linearGradient>
+
+    <linearGradient id="gradHomeBorder" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="{{HOME_COR1}}"/>
+      <stop offset="100%" stop-color="{{HOME_COR2}}"/>
+    </linearGradient>
+
+    <!-- Filtros de sombra e glow -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="shadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="4" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Pattern geométrico -->
+    <pattern id="pattern1" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M0 0L40 40M40 0L0 40" stroke="{{AWAY_COR1}}" stroke-width="0.5" opacity="0.1"/>
+    </pattern>
+
+    <pattern id="pattern2" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M0 0L40 40M40 0L0 40" stroke="{{HOME_COR1}}" stroke-width="0.5" opacity="0.1"/>
+    </pattern>
+  </defs>
+
+  <!-- Fundo base -->
+  <rect width="1200" height="675" fill="#f8f9fa" />
+
+  <!-- Split diagonal de fundo -->
+  <polygon points="0,0 650,0 550,675 0,675" fill="{{AWAY_COR2}}" opacity="0.08"/>
+  <polygon points="550,0 1200,0 1200,675 650,675" fill="{{HOME_COR2}}" opacity="0.08"/>
+
+  <!-- Efeitos radiais partindo dos logos -->
+  <rect width="1200" height="675" fill="url(#radialAway)" />
+  <rect width="1200" height="675" fill="url(#radialHome)" />
+
+  <!-- Patterns geométricos -->
+  <rect x="0" y="0" width="600" height="675" fill="url(#pattern1)"/>
+  <rect x="600" y="0" width="600" height="675" fill="url(#pattern2)"/>
+
+  <!-- Header com logo da NFL -->
+  <rect x="0" y="0" width="1200" height="140" fill="rgba(255,255,255,0.95)" filter="url(#shadow)"/>
+  <rect x="0" y="138" width="600" height="2" fill="url(#gradAwayBorder)" opacity="0.5"/>
+  <rect x="600" y="138" width="600" height="2" fill="url(#gradHomeBorder)" opacity="0.5"/>
+
+  <!-- Week badge -->
+  <rect x="1050" y="30" width="120" height="80" rx="12" fill="rgba(1,51,105,0.1)" stroke="#013369" stroke-width="2"/>
+  <text x="1110" y="60" font-size="16" fill="#013369" font-family="Arial" font-weight="bold" text-anchor="middle">WEEK</text>
+  <text x="1110" y="90" font-size="32" fill="#013369" font-family="Arial" font-weight="bold" text-anchor="middle">{{WEEK}}</text>
+
+  <!-- Short Name centered -->
+  <text x="600" y="80" font-size="36" fill="#1a1a1a" font-family="Arial" font-weight="bold" text-anchor="middle" letter-spacing="2">{{SHORT_NAME}}</text>
+
+  <!-- Linha divisória central -->
+  <rect x="598" y="150" width="4" height="390" fill="url(#gradAwayBorder)" opacity="0.3"/>
+  <rect x="598" y="150" width="4" height="390" fill="url(#gradHomeBorder)" opacity="0.3" style="mix-blend-mode: screen"/>
+
+  <!-- Away Team Section -->
+  <g filter="url(#shadow)">
+    <rect x="130" y="180" width="340" height="340" rx="24" fill="rgba(255,255,255,0.9)" />
+  </g>
+
+  <!-- Borda externa glow Away -->
+  <rect x="125" y="175" width="350" height="350" rx="26" fill="none" stroke="url(#gradAwayBorder)" stroke-width="6" filter="url(#glow)" opacity="0.8"/>
+
+  <!-- Borda interna Away -->
+  <rect x="135" y="185" width="330" height="330" rx="22" fill="none" stroke="url(#gradAwayBorder)" stroke-width="2" opacity="0.4"/>
+
+  <!-- Home Team Section -->
+  <g filter="url(#shadow)">
+    <rect x="730" y="180" width="340" height="340" rx="24" fill="rgba(255,255,255,0.9)" />
+  </g>
+
+  <!-- Borda externa glow Home -->
+  <rect x="725" y="175" width="350" height="350" rx="26" fill="none" stroke="url(#gradHomeBorder)" stroke-width="6" filter="url(#glow)" opacity="0.8"/>
+
+  <!-- Borda interna Home -->
+  <rect x="735" y="185" width="330" height="330" rx="22" fill="none" stroke="url(#gradHomeBorder)" stroke-width="2" opacity="0.4"/>
+
+  <!-- @ Symbol -->
+  <circle cx="600" cy="350" r="60" fill="rgba(255,255,255,0.95)" filter="url(#shadow)"/>
+  <circle cx="600" cy="350" r="60" fill="none" stroke="url(#gradAwayBorder)" stroke-width="3" opacity="0.5"/>
+  <circle cx="600" cy="350" r="60" fill="none" stroke="url(#gradHomeBorder)" stroke-width="3" opacity="0.5" stroke-dasharray="8 4" style="mix-blend-mode: screen"/>
+
+  <text x="600" y="370" font-size="48" fill="#1a1a1a" font-family="Arial" font-weight="bold" text-anchor="middle">@</text>
+
+  <!-- Away Team Info (below logo) -->
+  <text x="300" y="470" font-size="28" fill="#1a1a1a" font-family="Arial" font-weight="bold" text-anchor="middle" letter-spacing="1">{{AWAY_NAME}}</text>
+  <text x="300" y="500" font-size="20" fill="#555555" font-family="Arial" text-anchor="middle">{{AWAY_RECORD}}</text>
+
+  <!-- Home Team Info (below logo) -->
+  <text x="900" y="470" font-size="28" fill="#1a1a1a" font-family="Arial" font-weight="bold" text-anchor="middle" letter-spacing="1">{{HOME_NAME}}</text>
+  <text x="900" y="500" font-size="20" fill="#555555" font-family="Arial" text-anchor="middle">{{HOME_RECORD}}</text>
+
+  <!-- Footer -->
+  <rect x="0" y="545" width="1200" height="130" fill="rgba(255,255,255,0.95)" filter="url(#shadow)"/>
+  <rect x="0" y="545" width="600" height="2" fill="url(#gradAwayBorder)" opacity="0.5"/>
+  <rect x="600" y="545" width="600" height="2" fill="url(#gradHomeBorder)" opacity="0.5"/>
+
+  <!-- Ícone decorativo central -->
+  <circle cx="600" cy="610" r="3" fill="url(#gradAwayBorder)"/>
+  <circle cx="590" cy="610" r="2" fill="url(#gradAwayBorder)" opacity="0.6"/>
+  <circle cx="610" cy="610" r="2" fill="url(#gradHomeBorder)" opacity="0.6"/>
+
+  <text x="600" y="590" font-size="36" fill="#1a1a1a" font-family="Arial" font-weight="bold" text-anchor="middle" letter-spacing="2">{{DATA}} — {{HORA}}</text>
+
+  <text x="600" y="635" font-size="24" fill="#555555" font-family="Arial" text-anchor="middle" letter-spacing="1">{{ESTADIO}}</text>
+
+  <text x="600" y="660" font-size="18" fill="#777777" font-family="Arial" text-anchor="middle" letter-spacing="0.5">{{CIDADE}}</text>
+
+  <!-- Elementos decorativos laterais -->
+  <line x1="180" y1="610" x2="380" y2="610" stroke="url(#gradAwayBorder)" stroke-width="1" opacity="0.3"/>
+  <line x1="820" y1="610" x2="1020" y2="610" stroke="url(#gradHomeBorder)" stroke-width="1" opacity="0.3"/>
+
+</svg>
