@@ -29,7 +29,7 @@
     }
   ],
   "defaultVariables": {
-    "WEEK": "1",
+    "ROUND": "WEEK 1",
     "SHORT_NAME": "AWAY @ HOME",
     "AWAY_NAME": "AWAY TEAM",
     "AWAY_RECORD": "0-0",

@@ -76,10 +76,9 @@
   <rect x="0" y="138" width="600" height="2" fill="url(#gradAwayBorder)" opacity="0.5"/>
   <rect x="600" y="138" width="600" height="2" fill="url(#gradHomeBorder)" opacity="0.5"/>
 
-  <!-- Week badge -->
-  <rect x="1050" y="30" width="120" height="80" rx="12" fill="rgba(1,51,105,0.1)" stroke="#013369" stroke-width="2"/>
-  <text x="1110" y="60" font-size="16" fill="#013369" font-family="Arial" font-weight="bold" text-anchor="middle">WEEK</text>
-  <text x="1110" y="90" font-size="32" fill="#013369" font-family="Arial" font-weight="bold" text-anchor="middle">{{WEEK}}</text>
+  <!-- Round badge -->
+  <rect x="1000" y="30" width="170" height="80" rx="12" fill="rgba(1,51,105,0.1)" stroke="#013369" stroke-width="2"/>
+  <text x="1085" y="75" font-size="22" fill="#013369" font-family="Arial" font-weight="bold" text-anchor="middle" letter-spacing="0.5">{{ROUND}}</text>
 
   <!-- Short Name centered -->
   <text x="600" y="80" font-size="36" fill="#1a1a1a" font-family="Arial" font-weight="bold" text-anchor="middle" letter-spacing="2">{{SHORT_NAME}}</text>
